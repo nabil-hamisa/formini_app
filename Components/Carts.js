@@ -35,6 +35,8 @@ const data = [
   },
 ];
 const Cat = ({ item }) => {
+  const navigation = useNavigation();
+
   return (
     <View style={styles.item}>
       <TouchableOpacity

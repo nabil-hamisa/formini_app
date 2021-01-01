@@ -8,11 +8,12 @@ import LoginSelection from "./Components/LoginSelection";
 import { NavigationContainer } from "@react-navigation/native";
 import Tab from "./Components/Tabs";
 import { createStackNavigator } from "@react-navigation/stack";
+import SpecialistList from "./Components/SpecialistList";
 
 const Stack = createStackNavigator();
 
 function App() {
-  Const SpecialiatList=() =>return(<></>)
+
 
   return (
     <NavigationContainer>

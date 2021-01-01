@@ -8,7 +8,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
 
 const { height, width } = Dimensions.get("screen");
-function Home() {
+function SpecialistList() {
   return (
     <>
       <View style={styles.container}></View>

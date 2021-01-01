@@ -48,6 +48,8 @@ const data = [
   },
 ];
 const Cat = ({ item }) => {
+  const navigation = useNavigation();
+
   return (
     <ImageBackground source={{ uri: item.image }} style={styles.image}>
       <TouchableOpacity onPress={() => navigation.navigate("SpecialistList")}>
