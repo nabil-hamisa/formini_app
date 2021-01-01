@@ -40,7 +40,7 @@ const Cat = ({ item }) => {
   return (
     <View style={styles.item}>
       <TouchableOpacity
-        onPress={() => navigation.navigate("SpecialistDetails")}
+        onPress={() => navigation.navigate("SpecialistList")}
       >
         <View style={{ flexDirection: "row", height: 130 }}>
           <View
