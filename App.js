@@ -6,9 +6,9 @@ import Home from "./Components/home";
 import Login from "./Components/Login";
 import LoginSelection from "./Components/LoginSelection";
 import { NavigationContainer } from "@react-navigation/native";
+import SpecialistList from "./Components/SpecialistList";
 import Tab from "./Components/Tabs";
 import { createStackNavigator } from "@react-navigation/stack";
-import SpecialistList from "./Components/SpecialistList";
 
 const Stack = createStackNavigator();
 
