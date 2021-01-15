@@ -1,110 +1,164 @@
 import * as React from "react";
+import { Ionicons } from '@expo/vector-icons';
 
-import { Appbar, Avatar, Searchbar } from "react-native-paper";
-import { Button, Input } from "react-native-elements";
+import { Appbar, Searchbar } from "react-native-paper";
 import {
   FlatList,
   Image,
   ImageBackground,
   StyleSheet,
-  Text,
+ 
   TouchableOpacity,
   View,
 } from "react-native";
+import { Card, Text, Divider } from "react-native-elements";
 
+import { courseImgUrl } from "./config/imghttp";
 import { Dimensions } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
+import accesClient from "./config/accesClient";
 
-const { height, width } = Dimensions.get("screen");
-const data = [
-  {
-    id: 1,
+class Search extends React.Component {
+  constructor(props) {
+    super(props);
 
-    image: "https://picsum.photos/200/300",
-  },
-  {
-    id: 7,
+    this.state = {
+      loading: true,
+      CoursesData: [],
+      filtredData:[],
+      searchQuery:"",
+    };
+  }
+  
+  async getcourse() {
+    await accesClient.get("/course").then((res) => {
+      console.log(res.data.course);
 
-    image: "https://picsum.photos/200/300",
-  },
-  {
-    id: 2,
+      this.setState({
+        CoursesData: res.data.course,
+        filtredData: res.data.course,
+      });
+    });
+  }
+  handleSearcheChange= (query)=>{
+     this.setState({
+      searchQuery:query
+    });
+    var filtred = this.state.CoursesData.filter(item=> (item.name_co.toLowerCase()).includes(query.toLowerCase()))
+    this.setState({
+      filtredData:filtred
+    });
 
-    image: "https://picsum.photos/200/300",
-  },
-  {
-    id: 4,
+  }
+  componentDidMount() {
+    this.getcourse();
+  }
 
-    image: "https://picsum.photos/200/300",
-  },
-  {
-    id: 5,
-
-    image: "https://picsum.photos/200/300",
-  },
-  {
-    id: 6,
-
-    image: "https://picsum.photos/200/300",
-  },
-];
-
-const Cat = ({ item }) => {
-  const navigation = useNavigation();
-  return (
-    <TouchableOpacity onPress={() => navigation.navigate("SpecialistList")}>
-      <ImageBackground
-        source={{ uri: item.image }}
-        style={styles.image}
-      ></ImageBackground>
-    </TouchableOpacity>
-  );
-};
-const Search = () => {
-  return (
-    <View>
-      <Appbar.Header style={{ backgroundColor: "#FFFFFF", elevation: 0 }}>
-        <Appbar.Content
-          title="Search"
-          titleStyle={{ color: "black", padding: 20 }}
-        />
-      </Appbar.Header>
-      <View style={{ marginHorizontal: 10 }}>
-        <Searchbar
-          placeholder="Search"
-          style={{
-            borderWidth: 1,
-            borderColor: "white",
-            elevation: 15,
-            margin: 20,
-          }}
+  render() {
+    const Cat = ({ item }) => {
+      const navigation = useNavigation();
+      return (
+        <TouchableOpacity
+        onPress={() =>
+          navigation.navigate("CourseDetails", {
+            id:item.id,
+            nom:item.name_co,
+          })
+        }
+      >
+        <Card containerStyle={styles.card}>
+          <Image
+            style={styles.image}
+            source={{ uri: courseImgUrl + item.id }}
+          />
+          <Divider
+            style={{ backgroundColor: "#dfe6e9", marginVertical: 15 }}
+          />
+          <Text style={styles.notes}>Center Name:{item.center}</Text>
+          <Text style={styles.notes}>Course Name:{item.name_co}</Text>
+          <Text style={styles.notes}>Category:{item.category}</Text>
+          <Divider
+            style={{ backgroundColor: "#dfe6e9", marginVertical: 15 }}
+          />
+          <TouchableOpacity style={styles.button}>
+            <Text style={styles.time}>
+              {" "}
+              <Ionicons name="cart" size={25} color="black" /> Buy:
+              {item.price}$
+            </Text>
+          </TouchableOpacity>
+        </Card>
+      </TouchableOpacity>
+      );
+    };
+    return (
+      <View>
+        <Appbar.Header style={{ backgroundColor: "#FFFFFF", elevation: 0 }}>
+          <Appbar.Content
+            title="Search"
+            titleStyle={{ color: "black", padding: 20 }}
+          />
+        </Appbar.Header>
+        <View style={{ marginHorizontal: 10 }}>
+          <Searchbar
+            onChangeText={this.handleSearcheChange}
+            value={this.state.searchQuery}
+            placeholder="Search"
+            style={{
+              borderWidth: 1,
+              borderColor: "white",
+              elevation: 15,
+              margin: 20,
+            }}
+          />
+        </View>
+        <FlatList
+           contentContainerStyle={{ paddingBottom: 150 }}
+          keyExtractor={(item) => item.id.toString()}
+          data={this.state.filtredData}
+          renderItem={({ item }) => <Cat item={item} />}
         />
       </View>
-      <FlatList data={data} renderItem={({ item }) => <Cat item={item} />} />
-    </View>
-  );
-};
+    );
+  }
+}
+const { height, width } = Dimensions.get("screen");
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: "column",
+  card: {
+    backgroundColor: "#ffa500",
+    marginTop: 20,
+
+    borderWidth: 0,
+    borderRadius: 20,
+    flex:1,
+    justifyContent:"center",
+  },
+  time: {
+    alignSelf:"center",
+
+    fontSize: 25,
+    color: "black",
+    fontWeight: "bold",
+  },
+  notes: {
+    fontSize: 20,
+    color: "#fff",
+    textTransform: "capitalize",
   },
   image: {
-    flex: 1,
+    alignSelf:"center",
+    borderWidth: 4,
+    borderColor: "black",
+    width: 350,
+    height: 200,
+    borderRadius:25,
 
-    height: height * 0.5,
-    width: width * 0.8,
-    resizeMode: "contain",
-    justifyContent: "center",
-    marginVertical: 10,
-    marginHorizontal: width * 0.1,
-  },
-  text: {
-    color: "white",
-    fontSize: 30,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
+    backgroundColor: "#ffa500",
+  },button:{
+    backgroundColor: "#dfe6e9",
+     borderRadius:25,
+  }
+
 });
 export default Search;

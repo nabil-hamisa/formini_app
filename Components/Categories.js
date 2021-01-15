@@ -1,4 +1,6 @@
 import * as React from "react";
+import { categoryImgUrl } from "./config/imghttp";
+import accesClient from "./config/accesClient";
 
 import {
   FlatList,
@@ -15,68 +17,70 @@ import { Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 const { height, width } = Dimensions.get("screen");
-const data = [
-  {
-    id: 1,
-    title: "lorem",
-    image: "https://picsum.photos/200/300",
-  },
-  {
-    id: 7,
-    title: "lorem",
-    image: "https://picsum.photos/200/300",
-  },
-  {
-    id: 2,
-    title: "lorem",
-    image: "https://picsum.photos/200/300",
-  },
-  {
-    id: 4,
-    title: "lorem",
-    image: "https://picsum.photos/200/300",
-  },
-  {
-    id: 5,
-    title: "lorem",
-    image: "https://picsum.photos/200/300",
-  },
-  {
-    id: 6,
-    title: "lorem",
-    image: "https://picsum.photos/200/300",
-  },
-];
-const Cat = ({ item }) => {
-  const navigation = useNavigation();
 
-  return (
-    <ImageBackground source={{ uri: item.image }} style={styles.image}>
-      <TouchableOpacity onPress={() => navigation.navigate("SpecialistList")}>
-        <Image
-          source={{
-            uri: item.image,
-          }}
-          resizeMode="cover"
+class Categories extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      loading: true,
+      categories: {},
+    };
+  }
+  getCategory = async () => {
+    await accesClient.get("/category").then((res) => {
+      console.log(res.data.category);
+
+      this.setState({
+        categories: res.data.category,
+      });
+    });
+  };
+  componentDidMount = () => {
+    this.getCategory();
+  };
+  //
+
+  render() {
+    const Cat = ({ item }) => {
+      const navigation = useNavigation();
+
+      return (
+        <TouchableOpacity onPress={() => navigation.navigate("SpecialistList",{
+          id:item.id,
+          nom:item.nom
+        })}>
+          <ImageBackground
+            source={{ uri: categoryImgUrl + item.id }}
+            style={styles.image}
+          >
+            <Image
+              source={{
+                uri: item.image,
+              }}
+              resizeMode="cover"
+            />
+            <Text style={styles.text}>{item.nom}</Text>
+          </ImageBackground>
+        </TouchableOpacity>
+      );
+    };
+    return (
+      <View>
+        <Appbar.Header style={{ backgroundColor: "#FFFFFF", elevation: 0 }}>
+          <Appbar.Content
+            title="Categories"
+            titleStyle={{ color: "black", padding: 20 }}
+          />
+        </Appbar.Header>
+        <FlatList
+          data={this.state.categories}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => <Cat item={item} />}
         />
-        <Text style={styles.text}>{item.title}</Text>
-      </TouchableOpacity>
-    </ImageBackground>
-  );
-};
-const Categories = () => {
-  return (
-    <View>
-      <Appbar.Header style={{ backgroundColor: "#FFFFFF", elevation: 0 }}>
-        <Appbar.Content
-          title="Categories"
-          titleStyle={{ color: "black", padding: 20 }}
-        />
-      </Appbar.Header>
-      <FlatList data={data} renderItem={({ item }) => <Cat item={item} />} />
-    </View>
-  );
-};
+      </View>
+    );
+  }
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -93,11 +97,16 @@ const styles = StyleSheet.create({
     marginHorizontal: width * 0.1,
   },
   text: {
+    backgroundColor: "black",
     justifyContent: "flex-end",
-    color: "white",
+    color: "#ffa500",
     fontSize: 30,
     fontWeight: "bold",
     textAlign: "center",
   },
 });
-export default Categories;
+export default function (props) {
+  const Navigation = useNavigation();
+
+  return <Categories {...props} Navigation={Navigation} />;
+}

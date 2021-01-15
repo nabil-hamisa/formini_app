@@ -29,6 +29,16 @@ const data = [
     image: "https://picsum.photos/200/300",
   },
   {
+    id: 7,
+    title: "lorem",
+    image: "https://picsum.photos/200/300",
+  },
+  {
+    id: 7,
+    title: "lorem",
+    image: "https://picsum.photos/200/300",
+  },
+  {
     id: 2,
     title: "lorem",
     image: "https://picsum.photos/200/300",

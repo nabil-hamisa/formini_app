@@ -7,6 +7,8 @@ import Login from "./Components/Login";
 import LoginSelection from "./Components/LoginSelection";
 import { NavigationContainer } from "@react-navigation/native";
 import SpecialistList from "./Components/SpecialistList";
+import CourseDetails from "./Components/CourseDetails";
+
 import Tab from "./Components/Tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 
@@ -42,6 +44,11 @@ function App() {
           options={{ headerShown: false }}
           name="SpecialistList"
           component={SpecialistList}
+        />
+          <Stack.Screen
+          options={{ headerShown: false }}
+          name="CourseDetails"
+          component={CourseDetails}
         />
       </Stack.Navigator>
     </NavigationContainer>

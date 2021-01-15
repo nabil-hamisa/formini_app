@@ -1,22 +1,20 @@
 import * as React from "react";
 import { courseImgUrl } from "./config/imghttp";
-import { Button, Input } from "react-native-elements";
 import {
   FlatList,
   Image,
-  ImageBackground,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
-import { Card, Text,Divider } from "react-native-elements";
-
+import { Card, Text, Divider } from "react-native-elements";
+import { Ionicons } from "@expo/vector-icons";
+import { Appbar } from "react-native-paper";
 import { Component } from "react";
 import { Dimensions } from "react-native";
-import Icon from "react-native-vector-icons/FontAwesome";
 import accesClient from "./config/accesClient";
 import { useNavigation } from "@react-navigation/native";
-import Moment from 'moment';
+import Moment from "moment";
 
 const { height, width } = Dimensions.get("screen");
 
@@ -29,9 +27,6 @@ class Home extends Component {
       CoursesData: "",
     };
   }
-
-
-
 
   async getcourse() {
     await accesClient.get("/course").then((res) => {
@@ -51,48 +46,55 @@ class Home extends Component {
 
     const Courses = ({ item }) => {
       return (
-
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate("CourseDetails", {
+              id:item.id,
+              nom:item.name_co,
+            })
+          }
+        >
           <Card containerStyle={styles.card}>
-            <View
-            style={{flexDirection:'row',alignItems:'center'}}
-            >
-              <TouchableOpacity>
-              <Image
+            <Image
               style={styles.image}
-                
-                  source={{ uri: courseImgUrl + item.id }}
-                />
-                <Text style={styles.notes}>Center Name:{item.center}</Text>
-                <Text style={styles.notes}>Course Name: {item.name_co}</Text>
-                <Text style={styles.notes}>Category:{item.category}</Text>
-
-                <Text style={styles.notes}>Description: {item.description}</Text>
-
-                <Divider style={{ backgroundColor: '#dfe6e9', marginVertical:20}} />
-
-                <Text style={styles.notes}>date:{Moment(item.date).format('DD/MM/Y')}</Text>
-                <Text style={styles.notes}>time:{Moment(item.date).format('HH:mm')}</Text>
-                <Text style={styles.notes}>Duration:{item.duration}H</Text>
-                <Divider style={{ backgroundColor: '#dfe6e9', marginVertical:20}} />
-
-
-                <Text style={styles.notes}>Rating: {item.rating}</Text>
-                <Text style={styles.time}>Price:{item.price}$</Text>
-               
-              </TouchableOpacity>
-            </View>
+              source={{ uri: courseImgUrl + item.id }}
+            />
+            <Divider
+              style={{ backgroundColor: "#dfe6e9", marginVertical: 15 }}
+            />
+            <Text style={styles.notes}>Center Name:{item.center}</Text>
+            <Text style={styles.notes}>Course Name: {item.name_co}</Text>
+            <Text style={styles.notes}>Category:{item.category}</Text>
+            <Divider
+              style={{ backgroundColor: "#dfe6e9", marginVertical: 15 }}
+            />
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.time}>
+                {" "}
+                <Ionicons name="cart" size={25} color="black" /> Buy:
+                {item.price}$
+              </Text>
+            </TouchableOpacity>
           </Card>
+        </TouchableOpacity>
       );
     };
 
     return (
-      <View style={styles.container}>
+      <View>
+        <Appbar.Header style={{ backgroundColor: "#FFFFFF", elevation: 0 }}>
+          <Appbar.Content
+            title="New Courses"
+            titleStyle={{ color: "black", padding: 20 }}
+          />
+        </Appbar.Header>
         <FlatList
+                 contentContainerStyle={{ paddingBottom: 80 }}
+
           data={this.state.CoursesData}
-          ke
-          renderItem={({ item }) => <Courses key={item.id} item={item} />}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => <Courses item={item} />}
           showsHorizontalScrollIndicator={false}
-          numColumns={3}
         />
       </View>
     );
@@ -100,34 +102,39 @@ class Home extends Component {
 }
 const styles = StyleSheet.create({
   card: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    flex:1,
     backgroundColor: "#ffa500",
-    marginTop:50,
+    marginTop: 20,
+
     borderWidth: 0,
     borderRadius: 20,
-  },time:{
-    marginLeft:200,
-    textAlign: 'right',
-		fontSize:25,
-		color:'black'
-	},
-	notes: {
-		fontSize: 20,
-		color:'#fff',
-    textTransform:'capitalize',
-	},image:{
-    borderWidth:4,
-    borderColor:'black',
-    justifyContent: 'center',
-    alignItems: 'center',
-    flex:1,
-    width: 310,
+    flex: 1,
+    justifyContent: "center",
+  },
+  time: {
+    alignSelf: "center",
+
+    fontSize: 25,
+    color: "black",
+    fontWeight: "bold",
+  },
+  notes: {
+    fontSize: 20,
+    color: "#fff",
+    textTransform: "capitalize",
+  },
+  image: {
+    alignSelf: "center",
+    borderWidth: 4,
+    borderColor: "black",
+    width: 350,
     height: 200,
-    borderRadius: 100,
-    resizeMode: "cover",
+    borderRadius: 25,
+
     backgroundColor: "#ffa500",
+  },
+  button: {
+    backgroundColor: "#dfe6e9",
+    borderRadius: 25,
   },
 
   //============

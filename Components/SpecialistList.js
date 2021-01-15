@@ -1,139 +1,153 @@
 import * as React from "react";
-
-import { Button, Input } from "react-native-elements";
-import { FlatList, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
-import   { Component } from "react";
+import { courseImgUrl } from "./config/imghttp";
+import {
+  FlatList,
+  Image,
+  
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Card, Text, Divider } from "react-native-elements";
+import { Ionicons } from '@expo/vector-icons';
+import { Appbar } from "react-native-paper";
+import { Component } from "react";
 import { Dimensions } from "react-native";
-import Icon from "react-native-vector-icons/FontAwesome";
+import accesClient from "./config/accesClient";
 import { useNavigation } from "@react-navigation/native";
+import Moment from "moment";
 
 const { height, width } = Dimensions.get("screen");
 
-class Home extends Component {
+class SpecialistList extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      loading:true,
-      CoursesData: ''
+      loading: true,
+      CoursesData: "",
     };
   }
-  getcourse() {
-    fetch("http://192.168.1.106:3000/api/course", {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-   
-      }
-    })
-    .then(res=>res.json()).then(respJson=>{
-    
-      this.setState({
-        
-      
-        CoursesData: respJson.course
-      });
-      console.log(this.state.CoursesData)
-      this.setState({
-        
-        loading:false
-      });
-      console.log(this.state.loading)
 
-    })
+  async getcourse(idCategory) {
+    console.log("idcateg=",idCategory);
+    await accesClient.get("/Course/category/"+idCategory).then((res) => {
+      console.log(res.data.course);
 
+      this.setState({
+        CoursesData: res.data.course,
+      });
+    });
   }
-
-   componentDidMount(){
-    
-    this.getcourse();
-
+  componentDidMount() {
+    console.log(this.props.route.params.id);
+    this.getcourse(this.props.route.params.id);
+  }
   
-   }
+  render() {
+    
+    const { navigation,route } = this.props;
+    const { nom } = route.params;
 
 
-  render (){
-    const { navigation } = this.props;
-
-   const Courses = ({ item }) => {
-
+    const Courses = ({ item }) => {
       return (
-        <View style={styles.item}>
-
-
-        <View style={styles.itemCategory}>
-          <TouchableOpacity  >
-          
-          <Text style={styles.itemText2}> {item.NAME_CO}</Text>
-          <Text style={styles.itemText2}> {item.DESCRIPTION}</Text>
-          <Text style={styles.itemText2}> {item.RAITING}</Text>
-          <Text style={styles.itemText2}> {item.NAME_CO}</Text>
-          <Text style={styles.itemText2}> {item.NAME_CO}</Text>
-          
-          
+        <TouchableOpacity
+        onPress={() =>
+          navigation.navigate("CourseDetails", {
+            id:item.id,
+            nom:item.name_co,
+          })
+        }
+      >
+        <Card containerStyle={styles.card}>
+          <Image
+            style={styles.image}
+            source={{ uri: courseImgUrl + item.id }}
+          />
+          <Divider
+            style={{ backgroundColor: "#dfe6e9", marginVertical: 15 }}
+          />
+          <Text style={styles.notes}>Center Name:{item.center}</Text>
+          <Text style={styles.notes}>Course Name: {item.name_co}</Text>
+          <Text style={styles.notes}>Category:{item.category}</Text>
+          <Divider
+            style={{ backgroundColor: "#dfe6e9", marginVertical: 15 }}
+          />
+          <TouchableOpacity style={styles.button}>
+            <Text style={styles.time}>
+              {" "}
+              <Ionicons name="cart" size={25} color="black" /> Buy:
+              {item.price}$
+            </Text>
           </TouchableOpacity>
-          
+        </Card>
+      </TouchableOpacity>
         
-          </View>
-
-        </View>
       );
     };
 
-  
-  return (
-  
-      <View style={styles.container}>
-        
-          <FlatList 
-        
-        data={this.state.CoursesData}
-        renderItem={({ item }) => <Courses item={item} />}
-        showsHorizontalScrollIndicator={false}
-        numColumns={3}
-      /> 
-      
+    return (
+      <View>
+      <Appbar.Header style={{ backgroundColor: "#FFFFFF", elevation: 0 }}>
+        <Appbar.Content
+          title={nom}
+          titleStyle={{ color: "black", padding: 20 }}
+        />
+      </Appbar.Header>
+        <FlatList
+         contentContainerStyle={{ paddingBottom: 80 }}
+          data={this.state.CoursesData}
+          keyExtractor={item => item.id.toString()}
+          renderItem={({ item }) => <Courses item={item} />}
+          showsHorizontalScrollIndicator={false}
+        />
       </View>
-    
-  );
-}
+    );
+  }
 }
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "white",
+  card: {
+    backgroundColor: "#ffa500",
+    marginTop: 20,
+    marginBottom: 10,
+
+    borderWidth: 0,
+    borderRadius: 20,
+    flex:1,
+    justifyContent:"center",
   },
-  item: {
-    flex : 1 ,
-    marginVertical: 10,
-    marginHorizontal: 5,
+  time: {
+    alignSelf:"center",
 
-    borderRadius : 5 ,
-     flexDirection: 'row',
-    justifyContent: 'space-around',
-
-
+    fontSize: 25,
+    color: "black",
+    fontWeight: "bold",
   },
-  itemCategory: {
-    margin: 10,
-    borderRadius : 5 ,
-     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginHorizontal:width*0.035
-
+  notes: {
+    fontSize: 20,
+    color: "#fff",
+    textTransform: "capitalize",
   },
-  itemText2: {
-    color: 'grey',
-    marginTop: 5,
-  },
+  image: {
+    alignSelf:"center",
+    borderWidth: 4,
+    borderColor: "black",
+    width: 350,
+    height: 200,
+    borderRadius:25,
 
+    backgroundColor: "#ffa500",
+  },button:{
+    backgroundColor: "#dfe6e9",
+     borderRadius:25,
+  }
 
+  //============
 });
 
-export default function(props) {
+export default function (props) {
   const Navigation = useNavigation();
 
-  return <Home {...props} Navigation={Navigation} />;
+  return <SpecialistList {...props} Navigation={Navigation} />;
 }
