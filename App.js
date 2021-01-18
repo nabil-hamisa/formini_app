@@ -4,6 +4,8 @@ import { Text, View } from "react-native";
 
 import Home from "./Components/home";
 import Login from "./Components/Login";
+import SignUp from "./Components/SignUp";
+
 import LoginSelection from "./Components/LoginSelection";
 import { NavigationContainer } from "@react-navigation/native";
 import SpecialistList from "./Components/SpecialistList";
@@ -33,7 +35,7 @@ function App() {
         <Stack.Screen
           options={{ headerShown: false }}
           name="SignUp"
-          component={Login}
+          component={SignUp}
         />
         <Stack.Screen
           options={{ headerShown: false }}

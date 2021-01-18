@@ -45,10 +45,14 @@ class Categories extends React.Component {
       const navigation = useNavigation();
 
       return (
-        <TouchableOpacity onPress={() => navigation.navigate("SpecialistList",{
-          id:item.id,
-          nom:item.nom
-        })}>
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate("SpecialistList", {
+              id: item.id,
+              nom: item.nom,
+            })
+          }
+        >
           <ImageBackground
             source={{ uri: categoryImgUrl + item.id }}
             style={styles.image}
@@ -73,6 +77,7 @@ class Categories extends React.Component {
           />
         </Appbar.Header>
         <FlatList
+          contentContainerStyle={{ paddingBottom: 150 }}
           data={this.state.categories}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => <Cat item={item} />}
@@ -88,13 +93,16 @@ const styles = StyleSheet.create({
   },
   image: {
     flex: 1,
-
+    margin: 25,
     height: height * 0.2,
     width: width * 0.8,
     resizeMode: "contain",
     justifyContent: "center",
     marginVertical: 10,
     marginHorizontal: width * 0.1,
+    borderColor: "black",
+    borderWidth: 3,
+  
   },
   text: {
     backgroundColor: "black",
