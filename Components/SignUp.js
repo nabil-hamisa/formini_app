@@ -75,7 +75,6 @@ function SignUp() {
 
 
 
-
   const doSignup = async () => {
     let localUri = file.uri;
     let filename = localUri.split('/').pop();

@@ -1,4 +1,4 @@
-import * as React from "react";
+import  React,{useEffect} from "react";
 
 import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
 
@@ -9,8 +9,10 @@ import { useNavigation } from "@react-navigation/native";
 
 const { height, width } = Dimensions.get("screen");
 
+
 function LoginSelection() {
   const navigation = useNavigation();
+
   return (
     <>
       <ImageBackground

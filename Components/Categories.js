@@ -15,6 +15,7 @@ import {
 import { Appbar } from "react-native-paper";
 import { Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { height, width } = Dimensions.get("screen");
 
@@ -35,8 +36,19 @@ class Categories extends React.Component {
       });
     });
   };
-  componentDidMount = () => {
+  getData = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem("user");
+      console.log("im here" + jsonValue);
+      return jsonValue != null ? JSON.parse(jsonValue) : null;
+    } catch (e) {
+      return null;
+    }
+  };
+  componentDidMount = async() => {
     this.getCategory();
+    var logged = await this.getData();
+    logged ? null : this.props.navigation.navigate("Login");
   };
   //
 

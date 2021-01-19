@@ -13,8 +13,9 @@ import { Appbar } from "react-native-paper";
 import { Component } from "react";
 import { Dimensions } from "react-native";
 import accesClient from "./config/accesClient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import { useNavigation } from "@react-navigation/native";
-import Moment from "moment";
 
 const { height, width } = Dimensions.get("screen");
 
@@ -30,15 +31,25 @@ class Home extends Component {
 
   async getcourse() {
     await accesClient.get("/course").then((res) => {
-      console.log(res.data.course);
-
       this.setState({
         CoursesData: res.data.course,
       });
     });
   }
-  componentDidMount() {
+  getData = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem("user");
+      console.log("im here" + jsonValue);
+      return jsonValue != null ? JSON.parse(jsonValue) : null;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  async componentDidMount() {
     this.getcourse();
+    var logged = await this.getData();
+    logged ? null : this.props.navigation.navigate("Login");
   }
 
   render() {
@@ -49,8 +60,8 @@ class Home extends Component {
         <TouchableOpacity
           onPress={() =>
             navigation.navigate("CourseDetails", {
-              id:item.id,
-              nom:item.name_co,
+              id: item.id,
+              nom: item.name_co,
             })
           }
         >
@@ -89,8 +100,7 @@ class Home extends Component {
           />
         </Appbar.Header>
         <FlatList
-                 contentContainerStyle={{ paddingBottom: 80 }}
-
+          contentContainerStyle={{ paddingBottom: 80 }}
           data={this.state.CoursesData}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => <Courses item={item} />}

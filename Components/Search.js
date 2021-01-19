@@ -18,6 +18,7 @@ import { Dimensions } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
 import accesClient from "./config/accesClient";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class Search extends React.Component {
   constructor(props) {
@@ -30,7 +31,15 @@ class Search extends React.Component {
       searchQuery:"",
     };
   }
-  
+  getData = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem('user')
+      console.log("im here"+jsonValue);
+      return jsonValue != null ? JSON.parse(jsonValue) : null;
+    } catch(e) {
+      return null
+    }
+  }
   async getcourse() {
     await accesClient.get("/course").then((res) => {
       console.log(res.data.course);
@@ -51,8 +60,10 @@ class Search extends React.Component {
     });
 
   }
-  componentDidMount() {
+  async  componentDidMount () {
     this.getcourse();
+    var logged =await this.getData();
+    logged?null:this.props.navigation.navigate("Login");
   }
 
   render() {

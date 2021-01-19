@@ -1,16 +1,69 @@
 import * as React from "react";
 
 import { Button, Input } from "react-native-elements";
-import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
+import {
+  Image,
+  ImageBackground,
+  StyleSheet,
+  Text,
+  View,
+  ToastAndroid,
+} from "react-native";
+import accesClient from "./config/accesClient";
 
 import { Dimensions } from "react-native";
-import Icon from "react-native-vector-icons/FontAwesome";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from "@react-navigation/native";
+import useForm from "react-hooks-form-validator";
 
 const { height, width } = Dimensions.get("screen");
-
+const formConfig = {
+  mail: {
+    required: true,
+    patterns: [
+      {
+        regex: new RegExp(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/),
+        errorMsg: "Please enter a Valid email !",
+      },
+    ],
+  },
+  password: {
+    min: 6,
+    max: 20,
+    required: true,
+  },
+};
+const showToast = (message) => {
+  ToastAndroid.show(message, ToastAndroid.SHORT);
+};
 function Login() {
   const navigation = useNavigation();
+
+  const [fields, formData] = useForm(formConfig);
+
+  const doLogin = async () => {
+    await accesClient
+      .post("/user/login", {
+        mail: fields.mail.value,
+        password: fields.password.value,
+      })
+      .then((res) => {
+        let user= JSON.stringify(res.data.user)
+        AsyncStorage.setItem('user',user);
+       
+        navigation.navigate("HomePage");
+
+      })
+      .catch((err) => {
+        showToast(
+          err.response.data.message
+            ? err.response.data.message
+            : "Something bad happened"
+        );
+      });
+   
+  };
+
   return (
     <>
       <ImageBackground
@@ -42,63 +95,35 @@ function Login() {
             label={"Email"}
             labelStyle={{ color: "white" }}
             inputStyle={{ backgroundColor: "white", borderRadius: 10 }}
-            onPress={() => navigation.navigate("HomePage")}
+            onChangeText={fields.mail.setValue}
+            value={fields.mail.value}
           />
+          {fields.mail.errorMsg ? (
+            <Text style={styles.errmsg}>{fields.mail.errorMsg}</Text>
+          ) : null}
 
           <Input
             placeholder="Password"
             label={"Password"}
             labelStyle={{ color: "white" }}
             secureTextEntry={true}
+            onChangeText={fields.password.setValue}
+            value={fields.password.value}
             inputStyle={{ backgroundColor: "white", borderRadius: 10 }}
           />
+          {fields.password.errorMsg ? (
+            <Text style={styles.errmsg}>{fields.password.errorMsg}</Text>
+          ) : null}
           <Button
-            title="Connexion"
+            title="Login"
             buttonStyle={{
               width: width * 0.5,
               backgroundColor: "white",
               borderRadius: 30,
             }}
             titleStyle={{ color: "orange", alignSelf: "center" }}
-            onPress={() => navigation.navigate("Login")}
-            onPress={() => navigation.navigate("HomePage")}
-          />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Button
-            icon={{
-              name: "facebook",
-              size: 35,
-              color: "white",
-            }}
-            buttonStyle={{
-              width: width * 0.5,
-              alignSelf: "center",
-              backgroundColor: "white",
-              borderRadius: 30,
-              backgroundColor: "#385898",
-            }}
-            titleStyle={{ color: "white" }}
-            title="Login with facebook"
-            onPress={() => navigation.navigate("HomePage")}
-          />
-
-          <Button
-            icon={{
-              name: "mail",
-              size: 35,
-              color: "red",
-            }}
-            buttonStyle={{
-              width: width * 0.5,
-              alignSelf: "center",
-              borderRadius: 30,
-              backgroundColor: "white",
-              marginTop: 20,
-            }}
-            titleStyle={{ color: "black" }}
-            title="Login with gmail"
-            onPress={() => navigation.navigate("HomePage")}
+            onPress={doLogin}
+            disabled={!formData.isValid}
           />
         </View>
       </ImageBackground>
@@ -123,6 +148,13 @@ const styles = StyleSheet.create({
     fontSize: 42,
     fontWeight: "bold",
     textAlign: "center",
+  },
+  errmsg: {
+    fontWeight: "bold",
+    borderRadius: 5,
+
+    backgroundColor: "#F08080",
+    color: "red",
   },
 });
 
