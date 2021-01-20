@@ -50,7 +50,8 @@ function Login() {
       .then((res) => {
         let user= JSON.stringify(res.data.user)
         AsyncStorage.setItem('user',user);
-       
+        AsyncStorage.removeItem('Cart');
+
         navigation.navigate("HomePage");
 
       })

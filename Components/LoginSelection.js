@@ -1,17 +1,26 @@
-import  React,{useEffect} from "react";
+import  React,{useEffect,useState} from "react";
 
 import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
 
 import { Button } from "react-native-elements";
 import { Dimensions } from "react-native";
-import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { height, width } = Dimensions.get("screen");
 
 
 function LoginSelection() {
   const navigation = useNavigation();
+  const [value, setValue] = useState(null);
+
+  function readItem() {
+    AsyncStorage.getItem("user").then(itemValue => setValue(itemValue));
+  }
+  useEffect(() => {
+    readItem()
+    value?navigation.navigate("HomePage") :null
+  });
 
   return (
     <>

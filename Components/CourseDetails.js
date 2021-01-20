@@ -1,6 +1,6 @@
 import * as React from "react";
 import { courseImgUrl } from "./config/imghttp";
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, TouchableOpacity, View,ToastAndroid } from "react-native";
 
 import { Card, Text, Divider } from "react-native-elements";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,6 +10,7 @@ import { Dimensions ,ScrollView } from "react-native";
 import accesClient from "./config/accesClient";
 import { useNavigation } from "@react-navigation/native";
 import Moment from "moment";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { height, width } = Dimensions.get("screen");
 
@@ -32,6 +33,34 @@ class CourseDetails extends Component {
       });
     });
   }
+  showToast = (message) => {
+    ToastAndroid.show(message, ToastAndroid.SHORT);
+  };
+   addCourse =async(course)=>{
+    const jsonValue = await AsyncStorage.getItem("Cart");
+    if(jsonValue!==null){
+          var myCourses=JSON.parse(jsonValue)
+          console.log("myCourses");
+
+          console.log(myCourses);
+          let founded =  myCourses.find(element => element.id===course.id)
+          founded ?this.showToast("Item Already exist in cart !") 
+          :myCourses.push(course)
+           myCourses= JSON.stringify(myCourses)
+           console.log("myCourses1");
+           console.log(myCourses);
+          AsyncStorage.setItem('Cart',myCourses);
+
+    }else{
+      let addCourse= [course]
+      console.log('addCourse');
+      console.log(addCourse);
+      let final=JSON.stringify(addCourse)
+      AsyncStorage.setItem('Cart',final);
+      this.showToast("Course added to cart !") 
+
+    }
+   }
   componentDidMount() {
     this.getcourse(this.props.route.params.id);
     console.log(this.state.CoursesData);
@@ -84,7 +113,7 @@ class CourseDetails extends Component {
 
           <Divider style={{ backgroundColor: "#dfe6e9", marginVertical: 25 }} />
 
-          <TouchableOpacity style={styles.button}>
+          <TouchableOpacity onPress={()=>this.addCourse(this.state.CoursesData)} style={styles.button}>
             <Text style={styles.time}>
               {" "}
               <Ionicons name="cart" size={25} color="black" /> Buy:
