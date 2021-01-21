@@ -8,6 +8,7 @@ import Mat from "react-native-vector-icons/MaterialIcons";
 import Profile from "./Profile";
 import React from "react";
 import Search from "./Search";
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 function Tab() {
   const Tabs = AnimatedTabBarNavigator();
@@ -90,6 +91,7 @@ function Tab() {
         name="cart"
         component={Cart}
         options={{
+          tabBarBadge: 3,
           tabBarIcon: ({ focused, color, size }) => (
             <Mat
               name="shopping-cart"

@@ -50,6 +50,8 @@ class CourseDetails extends Component {
            console.log("myCourses1");
            console.log(myCourses);
           AsyncStorage.setItem('Cart',myCourses);
+          this.showToast("Course has been aded to cart !") 
+
 
     }else{
       let addCourse= [course]

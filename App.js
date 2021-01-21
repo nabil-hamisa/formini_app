@@ -5,7 +5,6 @@ import { Text, View } from "react-native";
 import Home from "./Components/home";
 import Login from "./Components/Login";
 import SignUp from "./Components/SignUp";
-
 import LoginSelection from "./Components/LoginSelection";
 import { NavigationContainer } from "@react-navigation/native";
 import SpecialistList from "./Components/SpecialistList";

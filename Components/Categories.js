@@ -24,6 +24,7 @@ class Categories extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      user:{},
       loading: true,
       categories: {},
     };
@@ -56,15 +57,7 @@ class Categories extends React.Component {
 
     }
    }
-  getCategory = async () => {
-    await accesClient.get("/category").then((res) => {
-      console.log(res.data.category);
 
-      this.setState({
-        categories: res.data.category,
-      });
-    });
-  };
   getData = async () => {
     try {
       const jsonValue = await AsyncStorage.getItem("user");
@@ -74,7 +67,20 @@ class Categories extends React.Component {
       return null;
     }
   };
+  getCategory = async () => {
+    await accesClient.get("/category").then((res) => {
+      console.log(res.data.category);
+
+      this.setState({
+        categories: res.data.category,
+      });
+    });
+  };
   componentDidMount = async() => {
+    const {navigation} = this.props;
+    navigation.addListener ('focus', async() =>{
+      this.getCategory();
+    });
     this.getCategory();
     var logged = await this.getData();
     logged ? null : this.props.navigation.navigate("Login");

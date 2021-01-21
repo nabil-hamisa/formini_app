@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   View,
   ToastAndroid,
-
 } from "react-native";
 import { Card, Text, Divider } from "react-native-elements";
 import { Ionicons } from "@expo/vector-icons";
@@ -26,45 +25,65 @@ class Home extends Component {
     super(props);
 
     this.state = {
+      user: {},
       loading: true,
       CoursesData: "",
     };
+    this.focusListener = this.props.navigation.addListener(
+      "focus",
+      async () => {
+        this.getcourse();
+      }
+    );
   }
 
-   showToast = (message) => {
+  showToast = (message) => {
     ToastAndroid.show(message, ToastAndroid.SHORT);
   };
-   addCourse =async(course)=>{
+  addCourse = async (course) => {
     const jsonValue = await AsyncStorage.getItem("Cart");
-    if(jsonValue!==null){
-          var myCourses=JSON.parse(jsonValue)
-          console.log("myCourses");
+    if (jsonValue !== null) {
+      var myCourses = JSON.parse(jsonValue);
+      console.log("myCourses");
 
-          console.log(myCourses);
-          let founded =  myCourses.find(element => element.id===course.id)
-          founded ?this.showToast("Item Already exist in cart !") 
-          :myCourses.push(course)
-           myCourses= JSON.stringify(myCourses)
-           console.log("myCourses1")
-           console.log(myCourses)
-          AsyncStorage.setItem('Cart',myCourses)
-
-    }else{
-      let addCourse= [course]
-      console.log('addCourse');
+      console.log(myCourses);
+      let founded = myCourses.find((element) => element.id === course.id);
+      founded
+        ? this.showToast("Item Already exist in cart !")
+        : myCourses.push(course);
+      myCourses = JSON.stringify(myCourses);
+      console.log("myCourses1");
+      console.log(myCourses);
+      AsyncStorage.setItem("Cart", myCourses);
+      this.showToast("Course has been aded to cart !");
+    } else {
+      let addCourse = [course];
+      console.log("addCourse");
       console.log(addCourse);
-      let final=JSON.stringify(addCourse)
-      AsyncStorage.setItem('Cart',final);
-      this.showToast("Course added to cart !") 
+      let final = JSON.stringify(addCourse);
+      AsyncStorage.setItem("Cart", final);
+      this.showToast("Course has been aded to cart !");
     }
-   }
+  };
   async getcourse() {
-    await accesClient.get("/course").then((res) => {
-      this.setState({
-        CoursesData: res.data.course,
-      });
-    });
+    console.log(this.state.user.id);
+    this.state.user.id?
+    await accesClient
+      .get(`/course/notbought/${this.state.user.id}`)
+      .then((res) => {
+        this.setState({
+          CoursesData: res.data.course,
+        });
+      }):null;
   }
+  async componentDidMount() {
+    var logged = await this.getData();
+    logged
+      ? this.setState({ user: logged[0] })
+      : this.props.navigation.navigate("Login");
+    this.getcourse();
+  }
+
   getData = async () => {
     try {
       const jsonValue = await AsyncStorage.getItem("user");
@@ -75,12 +94,10 @@ class Home extends Component {
     }
   };
 
-  async componentDidMount() {
-    this.getcourse();
-    var logged = await this.getData();
-    logged ? null : this.props.navigation.navigate("Login");
-  }
-
+ 
+  componentWillUnmount = async () => {
+    this.focusListener();
+  };
   render() {
     const { navigation } = this.props;
 
@@ -108,7 +125,10 @@ class Home extends Component {
             <Divider
               style={{ backgroundColor: "#dfe6e9", marginVertical: 15 }}
             />
-            <TouchableOpacity onPress={()=>this.addCourse(item)} style={styles.button}>
+            <TouchableOpacity
+              onPress={() => this.addCourse(item)}
+              style={styles.button}
+            >
               <Text style={styles.time}>
                 <Ionicons name="cart" size={25} color="black" /> Buy:
                 {item.price}$

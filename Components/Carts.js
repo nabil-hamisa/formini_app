@@ -11,6 +11,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ToastAndroid,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -18,48 +19,74 @@ import { Dimensions } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import accesClient from "./config/accesClient";
 
 const { height, width } = Dimensions.get("screen");
-const data = [
-  {
-    id: 1,
-    title: "lorem",
-    image: "https://picsum.photos/200/300",
-  },
-  {
-    id: 2,
-    title: "lorem",
-    image: "https://picsum.photos/200/300",
-  },
-];
+
 class Cart extends React.Component {
+  
   constructor(props) {
+   
     super(props);
     this.state = {
       loading: true,
+      user:{},
       cart: [],
       total: 0,
     };
+    this.focusListener =this.props.navigation.addListener("focus", async () => {
+      this.getData();
+    });
   }
-  clearCart=()=>{
-    AsyncStorage.removeItem('Cart');
-    this.setState({cart:[],
-      total: 0,
+  showToast = (message) => {
+    ToastAndroid.show(message, ToastAndroid.SHORT);
+  };
+  doCheckout=async()=>{
+    const jsonValue = await AsyncStorage.getItem('user')
+    const user=JSON.parse(jsonValue)
+
+    await accesClient.post("/user/checkout",{
+      id:user[0].id,
+      courses:this.state.cart,
+    }).then(result=>{
+        this.showToast(result.data.message)
+        AsyncStorage.removeItem("Cart");
+        this.setState({ cart: [], total: 0 });
+    }).catch(err=>{
+      this.showToast(  err.response.data.message)
     })
   }
-  async componentDidMount() {
+  clearCart = () => {
+    AsyncStorage.removeItem("Cart");
+    this.setState({ cart: [], total: 0 });
+  };
+  removeCours=async(id)=>{
+    const cart = this.state.cart.filter((item) => item.id !== id);
+    await  this.setState({cart});
+    let final=JSON.stringify(this.state.cart)
+    await AsyncStorage.setItem('Cart',final);
+    this.getData()
+  }
+  
+
+  getData = async () => {
     const jsonValue = await AsyncStorage.getItem("Cart");
     this.setState({
-      cart: jsonValue !=null? JSON.parse(jsonValue) : [],
+      cart: jsonValue !== null ? JSON.parse(jsonValue) : [],
     });
-    let total = this.state.cart
-      .map((course) => course.price)
-      .reduce((acc, course) => course + acc);
-    console.log(total);
+    let total =this.state.cart.map((course) => course.price?course.price:0).reduce((previousValue, course) => course + previousValue);
     this.setState({
       total,
     });
+  };
+  async componentDidMount() {
+
+    
+    this.getData();
   }
+  componentWillUnmount = () => {
+    this.focusListener();
+}
 
   render() {
     const Cat = ({ item }) => {
@@ -75,7 +102,7 @@ class Cart extends React.Component {
               })
             }
           >
-            <View style={{ flexDirection: "row", height: 130 }}>
+            <View style={{   flexDirection: "row", justifyContent: "space-between"   }}>
               <View
                 style={{
                   backgroundColor: "white",
@@ -112,6 +139,19 @@ class Cart extends React.Component {
                 />
                 <Text style={styles.title}>{item.name}</Text>
               </View>
+              <Button
+                title=""
+                onPress={()=>this.removeCours(item.id)}
+                icon={<Ionicons name="close-outline" size={20} color="white" />}
+                buttonStyle={{
+                  marginLeft:40,
+                  backgroundColor: "red",
+                  borderRadius: 30,
+                  alignSelf: "flex-end",
+                
+                }}
+                titleStyle={{ color: "white", alignSelf: "center" }}
+              />
             </View>
           </TouchableOpacity>
         </View>
@@ -126,16 +166,14 @@ class Cart extends React.Component {
             titleStyle={{ color: "black", padding: 20 }}
           />
           <Text style={{ fontSize: 20, fontWeight: "bold" }}>Total:</Text>
-          <Text style={{color:'orange', fontSize: 20 }}>{this.state.total}$</Text>
+          <Text style={{ color: "orange", fontSize: 20 }}>
+            {this.state.total}$
+          </Text>
         </Appbar.Header>
-        {this.state.cart.length===0?null:<FlatList
-          data={this.state.cart}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => <Cat item={item} />}
-        />}
-        <View style={{flexDirection:'row',justifyContent : 'space-between'}}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <Button
-            disabled={this.state.cart.length==0}
+            onPress={this.doCheckout}
+            disabled={this.state.cart.length == 0}
             title="checkout"
             icon={{
               name: "shopping-cart",
@@ -158,14 +196,22 @@ class Cart extends React.Component {
             icon={<Ionicons name="trash" size={35} color="white" />}
             buttonStyle={{
               width: width * 0.2,
-              marginRight:  width * 0.04,
+              marginRight: width * 0.04,
               backgroundColor: "red",
               borderRadius: 30,
-              alignSelf: "flex-end"      
-                  }}
+              alignSelf: "flex-end",
+            }}
             titleStyle={{ color: "white", alignSelf: "center" }}
           />
         </View>
+        {this.state.cart.length === 0 ? null : (
+          <FlatList
+            style={{ marginBottom: 100 }}
+            data={this.state.cart}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => <Cat item={item} />}
+          />
+        )}
       </View>
     );
   }
